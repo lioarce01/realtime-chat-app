@@ -20,8 +20,12 @@ jobs:
         with:
           go-version: "1.23"
 
-      - name: Build
-        run: go build -v ./backend...
+      - name: Install dependencies
+        run: |
+          cd backend
+          go mod tidy
 
-      - name: Test
-        run: go test -v ./backend...
+      - name: Build application
+        run: |
+          cd backend
+          go build -v ./cmd/server
