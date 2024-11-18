@@ -1,11 +1,17 @@
 {
   "name": "@ice/lite-scaffold",
   "version": "1.3.0",
-  "description": "A new ice.js project.",
+  "description": "A real-time chat App",
   "dependencies": {
     "@ice/runtime": "^1.4.0",
+    "@radix-ui/react-icons": "^1.3.2",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.460.0",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "tailwind-merge": "^2.5.4",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@applint/spec": "^1.2.3",
