@@ -34,6 +34,7 @@ func main() {
 	}
 	chatService := services.NewChatService(chatRepo)
 	messageService := services.NewMessageService(webSocketService, chatService)
+	userService := services.NewUserService(userRepo)
 	
 	//Initialize goroutine
 	go webSocketService.BroadcastMessages()
@@ -41,15 +42,20 @@ func main() {
 	//Initialize controllers
 	authController := &controllers.AuthController{UserPort: &adapters.UserRepository{}}
 	chatController := controllers.NewChatController(messageService, chatService)
+	userController := controllers.NewUserController(userService)
 
 	//Setup gin router
 	r := gin.Default()
 
-	//Public routes
+	//Public User routes
+	r.GET("/users", userController.GetAllUsers)
+	r.GET("/users/:id", userController.GetUserByID)
+
+	//Public authentication routes
 	r.POST("/register", authController.Register)
 	r.POST("/login", authController.Login)
 
-	//Protected routes
+	//Protected chat routes
 	r.Use(middlewares.AuthMiddleware())
 	r.POST("/send-message", chatController.SendMessage)
 	r.POST("/create-chat", chatController.CreateChat) 

@@ -9,6 +9,8 @@ import (
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type UserRepository struct {}
@@ -51,4 +53,50 @@ func (r *UserRepository) Login(email, password string) (string, error) {
 	}
 
 	return token, nil
+}
+
+func (r *UserRepository) GetAllUsers() ([]models.User, error) {
+	collection := config.DB.Collection("users")
+	var users []models.User
+
+	findOptions := options.Find()
+
+	cursor, err := collection.Find(context.TODO(), bson.M{}, findOptions)
+	if err != nil {
+		log.Println("Error fetching users:", err)
+		return nil, err
+	}
+	defer cursor.Close(context.TODO())
+
+	for cursor.Next(context.TODO()) {
+		var user models.User
+		if err := cursor.Decode(&user); err != nil {
+			log.Println("Error decoding user:", err)
+			continue
+		}
+		users = append(users, user)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}
+
+func (r *UserRepository) GetUserByID(id string) (*models.User, error) {
+	collection := config.DB.Collection("users")
+	var user models.User
+
+	objectID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, errors.New("invalid user ID format")
+	}
+
+	err = collection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&user)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+
+	return &user, nil
 }
