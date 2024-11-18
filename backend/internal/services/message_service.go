@@ -1,6 +1,7 @@
 package services
 
 import (
+	"backend/internal/app/ports"
 	"backend/internal/config"
 	"backend/internal/models"
 	"log"
@@ -11,17 +12,19 @@ import (
 )
 
 type MessageService struct {
-	WebSocketManager *WebSocketManager
-	ChatService *ChatService
+    WebSocketManager *WebSocketManager
+    MessageRepo ports.MessagePort
+    ChatService ports.ChatPort
 }
 
-func NewMessageService(ws *WebSocketManager, chatService *ChatService) *MessageService {
+func NewMessageService(ws *WebSocketManager, messageRepo ports.MessagePort, chatService ports.ChatPort) *MessageService {
     return &MessageService{
         WebSocketManager: ws,
-        ChatService:      chatService,  
+        MessageRepo:      messageRepo,
+        ChatService:      chatService,
     }
 }
-
+                                                    
 func (service *MessageService) SendMessage(senderID, receiverID primitive.ObjectID, content string) (*models.Message, error) {
 
     if service.ChatService == nil {
@@ -54,4 +57,17 @@ func (service *MessageService) SendMessage(senderID, receiverID primitive.Object
     service.WebSocketManager.BroadcastMessage([]byte(content))
 
     return message, nil
+}
+
+func (service *MessageService) GetMessagesByChatID(chatID primitive.ObjectID) ([]models.Message, error) {
+    log.Printf("Fetching messages for chatID: %s", chatID.Hex()) 
+
+    messages, err := service.MessageRepo.GetMessagesByChatID(chatID)
+    if err != nil {
+        log.Printf("Error fetching messages from repository: %v", err)
+        return nil, err
+    }
+
+    log.Printf("Found %d messages for chatID: %s", len(messages), chatID.Hex()) 
+    return messages, nil
 }

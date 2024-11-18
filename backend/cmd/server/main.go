@@ -17,6 +17,9 @@ func main() {
 	config.LoadEnv()
 	config.ConnectDB()
 
+	//Setup gin router
+	r := gin.Default()
+
 	//Initialize repositories
 	userRepo := &adapters.UserRepository{}
 	chatRepo := &adapters.ChatRepository{}
@@ -33,7 +36,7 @@ func main() {
 		log.Fatal("WebSocketService is nil")
 	}
 	chatService := services.NewChatService(chatRepo)
-	messageService := services.NewMessageService(webSocketService, chatService)
+	messageService := services.NewMessageService(webSocketService, messageRepo, chatRepo)
 	userService := services.NewUserService(userRepo)
 	
 	//Initialize goroutine
@@ -41,24 +44,28 @@ func main() {
 	
 	//Initialize controllers
 	authController := &controllers.AuthController{UserPort: &adapters.UserRepository{}}
-	chatController := controllers.NewChatController(messageService, chatService)
+	chatController := controllers.NewChatController(chatService)
+	messageController := controllers.NewMessageController(messageService)
 	userController := controllers.NewUserController(userService)
-
-	//Setup gin router
-	r := gin.Default()
 
 	//Public User routes
 	r.GET("/users", userController.GetAllUsers)
 	r.GET("/users/:id", userController.GetUserByID)
+	r.GET("/users/:id/chats",chatController.GetUserChats)
 
 	//Public authentication routes
 	r.POST("/register", authController.Register)
 	r.POST("/login", authController.Login)
 
-	//Protected chat routes
+	//Protected routes
 	r.Use(middlewares.AuthMiddleware())
-	r.POST("/send-message", chatController.SendMessage)
-	r.POST("/create-chat", chatController.CreateChat) 
+
+	//Message routes
+	r.POST("/send-message", messageController.SendMessage)
+	r.GET("/chats/:id/messages", messageController.GetChatMessages)
+
+	//Chat routes
+	r.POST("/create-chat", chatController.CreateChat)
 
 	//Run server
 	r.Run(":" + config.GetPort())

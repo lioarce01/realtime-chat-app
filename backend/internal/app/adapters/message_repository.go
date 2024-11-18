@@ -5,6 +5,7 @@ import (
 	"backend/internal/config"
 	"backend/internal/models"
 	"context"
+	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,6 +16,7 @@ type MessageRepository struct{}
 
 var _ ports.MessagePort = &MessageRepository{}
 
+//SEND MESSAGE BETWEEN USERS
 func (r *MessageRepository) SendMessage(message *models.Message) error {
 	collection := config.DB.Collection("messages")
 	message.CreatedAt = time.Now()
@@ -22,18 +24,24 @@ func (r *MessageRepository) SendMessage(message *models.Message) error {
 	return err
 }
 
+//GET MESSAGES BY CHAT ID
 func (r *MessageRepository) GetMessagesByChatID(chatID primitive.ObjectID) ([]models.Message, error) {
-	collection := config.DB.Collection("messages")
-	var messages []models.Message
+    log.Printf("Querying MongoDB for chat_id: %s", chatID.Hex()) 
 
-	cursor, err := collection.Find(context.TODO(), bson.M{"chat_id": chatID})
-	if err != nil {
-		return nil, err
-	}
+    collection := config.DB.Collection("messages")
+    var messages []models.Message
 
-	if err := cursor.All(context.TODO(), &messages); err != nil {
-		return nil, err
-	}
+    cursor, err := collection.Find(context.TODO(), bson.M{"chat_id": chatID})
+    if err != nil {
+        log.Printf("Error querying messages: %v", err) 
+        return nil, err
+    }
 
-	return messages, nil
+    if err := cursor.All(context.TODO(), &messages); err != nil {
+        log.Printf("Error retrieving messages from cursor: %v", err) 
+        return nil, err
+    }
+
+    log.Printf("Retrieved %d messages for chat_id: %s", len(messages), chatID.Hex()) 
+    return messages, nil
 }

@@ -33,7 +33,7 @@ func (s *ChatService) GetUserChats(userID primitive.ObjectID) ([]models.Chat, er
 }
 
 func (s *ChatService) FindOrCreateChat(user1ID, user2ID primitive.ObjectID) (*models.Chat, error) {
-    chat, err := s.ChatRepo.FindChat(user1ID, user2ID)
+    chat, err := s.ChatRepo.FindOrCreateChat(user1ID, user2ID)
     if err == nil {
         return chat, nil
     }

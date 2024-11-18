@@ -9,5 +9,5 @@ import (
 type ChatPort interface {
 	CreateChat(user1ID, user2ID primitive.ObjectID) (*models.Chat, error)
 	GetChatsByUserID(userID primitive.ObjectID) ([]models.Chat, error)
-	FindChat(user1ID, user2ID primitive.ObjectID) (*models.Chat, error) 
+	FindOrCreateChat(user1ID, user2ID primitive.ObjectID) (*models.Chat, error)
 }

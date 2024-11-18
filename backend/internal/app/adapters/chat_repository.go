@@ -17,6 +17,7 @@ var _ ports.ChatPort = &ChatRepository{}
 
 type ChatRepository struct {}
 
+//CREATE A CHAT
 func (r *ChatRepository) CreateChat(user1ID, user2ID primitive.ObjectID) (*models.Chat, error) {
 	collection := config.DB.Collection("chats")
 
@@ -48,29 +49,34 @@ func (r *ChatRepository) CreateChat(user1ID, user2ID primitive.ObjectID) (*model
 	return chat, nil
 }
 
+//GET CHATS OF USER
 func (r *ChatRepository) GetChatsByUserID(userID primitive.ObjectID) ([]models.Chat, error) {
 	collection := config.DB.Collection("chats")
 	var chats []models.Chat
 
+	// Búsqueda en la colección
 	cursor, err := collection.Find(context.TODO(), bson.M{
 		"$or": []bson.M{
 			{"user1_id": userID},
 			{"user2_id": userID},
 		},
 	})
-
 	if err != nil {
+		log.Println("Error al buscar chats:", err)
 		return nil, err
 	}
+	defer cursor.Close(context.TODO())
 
 	if err := cursor.All(context.TODO(), &chats); err != nil {
+		log.Println("Error al decodificar chats:", err)
 		return nil, err
 	}
 
 	return chats, nil
 }
 
-func (r *ChatRepository) FindChat(user1ID, user2ID primitive.ObjectID) (*models.Chat, error) {
+//FIND A CHAT
+func (r *ChatRepository) FindOrCreateChat(user1ID, user2ID primitive.ObjectID) (*models.Chat, error) {
     if r == nil {
         log.Println("ChatRepository is nil")
         return nil, fmt.Errorf("repository is nil")

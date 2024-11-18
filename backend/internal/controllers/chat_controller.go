@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"backend/internal/services"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,44 +14,10 @@ type ChatController struct {
 	ChatService    *services.ChatService 
 }
 
-func NewChatController(messageService *services.MessageService, chatService *services.ChatService) *ChatController {
+func NewChatController(chatService *services.ChatService) *ChatController {
 	return &ChatController{
-		MessageService: messageService,
 		ChatService:    chatService,  
 	}
-}
-
-func (controller *ChatController) SendMessage(c *gin.Context) {
-	var messageRequest struct {
-		SenderID   string `json:"sender_id"`
-		ReceiverID string `json:"receiver_id"`
-		Content    string `json:"content"`
-	}
-
-	if err := c.ShouldBindJSON(&messageRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-		return
-	}
-
-	senderID, err := primitive.ObjectIDFromHex(messageRequest.SenderID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid sender_id"})
-		return
-	}
-
-	receiverID, err := primitive.ObjectIDFromHex(messageRequest.ReceiverID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid receiver_id"})
-		return
-	}
-
-	message, err := controller.MessageService.SendMessage(senderID, receiverID, messageRequest.Content)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send message"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": message})
 }
 
 func (controller *ChatController) CreateChat(c *gin.Context) {
@@ -83,4 +50,31 @@ func (controller *ChatController) CreateChat(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"chat": chat})
+}
+
+func (controller *ChatController) GetUserChats(c *gin.Context) {
+	userIDParam := c.Param("id")
+
+	log.Println("Received userIDParam:", userIDParam)
+
+	if len(userIDParam) != 24 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID must be a 24-character hex string."})
+		return
+	}
+
+	userID, err := primitive.ObjectIDFromHex(userIDParam)
+	if err != nil {
+		log.Println("Error converting userID to ObjectID:", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format. Must be a 24-character hex string."})
+		return
+	}
+
+	chats, err := controller.ChatService.GetUserChats(userID)
+	if err != nil {
+		log.Println("Error retrieving chats:", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not retrieve chats"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"chats": chats})
 }
