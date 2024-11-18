@@ -7,8 +7,10 @@ import (
 )
 
 type Message struct {
-	ID primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	Username string `json:"username" bson:"username"`
-	Content string `json:"content" bson:"content"`
-	Timestamp time.Time `json:"timestamp" bson:"timestamp"`
+    ID          primitive.ObjectID `bson:"_id,omitempty"`
+    ChatID      primitive.ObjectID `bson:"chat_id"`
+    SenderID    primitive.ObjectID `bson:"sender_id"`
+    ReceiverID  primitive.ObjectID `bson:"receiver_id"`
+    Content     string             `bson:"content"`
+    CreatedAt   time.Time             `bson:"created_at"`
 }
