@@ -47,7 +47,7 @@ func (r *UserRepository) Login(email, password string) (string, error) {
 		return "", errors.New("invalid credentials")
 	}
 
-	token, err := utils.GenerateJWT(user.Email)
+	token, err := utils.GenerateJWT(user.ID.Hex(), user.Email) 
 	if err != nil {
 		return "", err
 	}
