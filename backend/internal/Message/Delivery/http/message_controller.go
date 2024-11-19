@@ -1,8 +1,7 @@
-package controllers
+package http
 
 import (
-	"backend/internal/services"
-	"log"
+	usecase "backend/internal/Message/UseCase"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,10 +9,10 @@ import (
 )
 
 type MessageController struct {
-	MessageService *services.MessageService
+	MessageService *usecase.MessageService
 }
 
-func NewMessageController(messageService *services.MessageService) *MessageController {
+func NewMessageController(messageService *usecase.MessageService) *MessageController {
 	return &MessageController{
 		MessageService: messageService,
 	}
@@ -53,26 +52,18 @@ func (controller *MessageController) SendMessage(c *gin.Context) {
 }
 
 func (controller *MessageController) GetChatMessages(c *gin.Context) {
-    chatIDParam := c.Param("id")
-    log.Printf("Received chatID: %s", chatIDParam) 
+	chatIDParam := c.Param("id")
+	chatID, err := primitive.ObjectIDFromHex(chatIDParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid chat ID"})
+		return
+	}
 
-    chatID, err := primitive.ObjectIDFromHex(chatIDParam)
-    if err != nil {
-        log.Printf("Error parsing chat ID: %v", err) 
-        c.JSON(http.StatusBadRequest, gin.H{"error": "Chat ID must be a 24-character hex string."})
-        return
-    }
+	messages, err := controller.MessageService.GetMessagesByChatID(chatID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve messages"})
+		return
+	}
 
-    messages, err := controller.MessageService.GetMessagesByChatID(chatID)
-    if err != nil {
-        log.Printf("Error retrieving messages: %v", err) 
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not retrieve messages"})
-        return
-    }
-
-    if len(messages) == 0 {
-        log.Println("No messages found for chat ID:", chatID.Hex()) 
-    }
-
-    c.JSON(http.StatusOK, gin.H{"messages": messages})
+	c.JSON(http.StatusOK, gin.H{"messages": messages})
 }

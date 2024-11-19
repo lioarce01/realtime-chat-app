@@ -1,8 +1,8 @@
-package controllers
+package http
 
 import (
-	"backend/internal/app/ports"
-	"backend/internal/models"
+	domain "backend/internal/User/Domain"
+	ports "backend/internal/User/Ports"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -12,8 +12,14 @@ type AuthController struct {
 	UserPort ports.UserPort
 }
 
+func NewAuthController(userPort ports.UserPort) *AuthController {
+	return &AuthController{
+		UserPort: userPort,
+	}
+}
+
 func (c *AuthController) Register(ctx *gin.Context) {
-	var user models.User
+	var user domain.User
 
 	if err := ctx.ShouldBindJSON(&user); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
@@ -39,7 +45,7 @@ func (c *AuthController) Register(ctx *gin.Context) {
 }
 
 func (c *AuthController) Login(ctx *gin.Context) {
-	var creds models.User
+	var creds domain.User
 	if err := ctx.ShouldBindJSON(&creds); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid credentials"})
 		return

@@ -1,8 +1,7 @@
-package controllers
+package http
 
 import (
-	"backend/internal/services"
-	"log"
+	usecase "backend/internal/Chat/UseCase"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,13 +9,12 @@ import (
 )
 
 type ChatController struct {
-	MessageService *services.MessageService
-	ChatService    *services.ChatService 
+	ChatService *usecase.ChatService
 }
 
-func NewChatController(chatService *services.ChatService) *ChatController {
+func NewChatController(chatService *usecase.ChatService) *ChatController {
 	return &ChatController{
-		ChatService:    chatService,  
+		ChatService: chatService,
 	}
 }
 
@@ -55,23 +53,19 @@ func (controller *ChatController) CreateChat(c *gin.Context) {
 func (controller *ChatController) GetUserChats(c *gin.Context) {
 	userIDParam := c.Param("id")
 
-	log.Println("Received userIDParam:", userIDParam)
-
 	if len(userIDParam) != 24 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "User ID must be a 24-character hex string."})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
 
 	userID, err := primitive.ObjectIDFromHex(userIDParam)
 	if err != nil {
-		log.Println("Error converting userID to ObjectID:", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID format. Must be a 24-character hex string."})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
 		return
 	}
 
 	chats, err := controller.ChatService.GetUserChats(userID)
 	if err != nil {
-		log.Println("Error retrieving chats:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not retrieve chats"})
 		return
 	}
