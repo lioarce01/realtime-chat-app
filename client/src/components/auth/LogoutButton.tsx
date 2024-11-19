@@ -5,11 +5,12 @@ import { Button } from "@/components/ui/button";
 const LogoutButton = () => {
   const { isAuthenticated, logout, isLoading } = useAuth0();
 
-  const handleLogout = () => {
-    logout({
+  const handleLogout = async () => {
+    await logout({
       logoutParams: { returnTo: window.location.origin },
     });
   };
+
   return (
     <div>
       {isAuthenticated && (
