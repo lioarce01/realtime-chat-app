@@ -29,44 +29,65 @@ func Initialize() (*UserHTTP.AuthController, *ChatHTTP.ChatController, *MessageH
 	router := gin.Default()
 
 	// Initialize repositories
-	userRepo := URepository.NewUserRepository()
-	chatRepo := &CRepository.ChatRepository{}
-	messageRepo := &MRepository.MessageRepository{}
+	userRepo, chatRepo, messageRepo := initializeRepositories()
 
-	// Implement UserPort interface with UserRepository
-	var userPort UPorts.UserPort = userRepo
-	var chatPort CPorts.ChatPort = chatRepo
-	var messagePort MPorts.MessagePort = messageRepo
+	// Implement ports
+	userPort, chatPort, messagePort := initializePorts(userRepo, chatRepo, messageRepo)
 
 	// Initialize services
-	webSocketService := services.NewWebSocketManager()
-	if webSocketService == nil {
-		log.Fatal("WebSocketService is nil")
-	}
-
+	webSocketService := initializeWebSocketService()
 	chatService := CUseCase.NewChatService(chatPort)
 	userService := UUseCase.NewUserService(userPort)
 	messageService := MUseCase.NewMessageService(webSocketService, messagePort, chatPort)
 
-	// Start the goroutine for broadcasting messages via WebSocket
+	// Start WebSocket broadcasting
 	go webSocketService.BroadcastMessages()
 
 	// Initialize controllers
+	authController, userController, chatController, messageController := initializeControllers(userPort, userService, chatService, messageService)
+
+	// Register routes
+	registerRoutes(router, userController, authController, chatController, messageController)
+
+	// Return initialized components
+	return authController, chatController, messageController, userController, webSocketService, router
+}
+
+func initializeRepositories() (*URepository.UserRepository, *CRepository.ChatRepository, *MRepository.MessageRepository) {
+	return URepository.NewUserRepository(), &CRepository.ChatRepository{}, &MRepository.MessageRepository{}
+}
+
+func initializePorts(userRepo *URepository.UserRepository, chatRepo *CRepository.ChatRepository, messageRepo *MRepository.MessageRepository) (UPorts.UserPort, CPorts.ChatPort, MPorts.MessagePort) {
+	return userRepo, chatRepo, messageRepo
+}
+
+func initializeWebSocketService() *services.WebSocketManager {
+	webSocketService := services.NewWebSocketManager()
+	if webSocketService == nil {
+		log.Fatal("WebSocketService is nil")
+	}
+	return webSocketService
+}
+
+func initializeControllers(userPort UPorts.UserPort, userService *UUseCase.UserService, chatService *CUseCase.ChatService, messageService *MUseCase.MessageService) (*UserHTTP.AuthController, *UserHTTP.UserController, *ChatHTTP.ChatController, *MessageHTTP.MessageController) {
 	authController := UserHTTP.NewAuthController(userPort)
 	userController := UserHTTP.NewUserController(userService)
 	chatController := ChatHTTP.NewChatController(chatService)
 	messageController := MessageHTTP.NewMessageController(messageService)
 
+	return authController, userController, chatController, messageController
+}
+
+func registerRoutes(router *gin.Engine, userController *UserHTTP.UserController, authController *UserHTTP.AuthController, chatController *ChatHTTP.ChatController, messageController *MessageHTTP.MessageController) {
 	// Register user-related routes
 	userRoutes := UserHTTP.NewUserRoutes(userController, authController)
 	userRoutes.RegisterUserRoutes(router)
 
+	// Register chat-related routes
 	chatRoutes := ChatHTTP.NewChatRoutes(chatController)
 	chatRoutes.RegisterChatRoutes(router)
 	
+	// Register message-related routes
 	messageRoutes := MessageHTTP.NewMessageRoutes(messageController)
 	messageRoutes.RegisterMessageRoutes(router)
-
-	// Return the initialized controllers, services, and router
-	return authController, chatController, messageController, userController, webSocketService, router
 }

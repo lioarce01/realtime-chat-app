@@ -3,6 +3,7 @@ package repository
 import (
 	"backend/config"
 	domain "backend/internal/Domain/User/Domain"
+	ports "backend/internal/Domain/User/Ports"
 	"backend/internal/utils"
 	"context"
 	"errors"
@@ -12,6 +13,8 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+var _ ports.UserPort = &UserRepository{}
 
 type UserRepository struct{}
 

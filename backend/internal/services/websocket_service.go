@@ -2,22 +2,39 @@ package services
 
 import (
 	"log"
+	"net/http"
 	"sync"
 
+	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
 
 type WebSocketManager struct {
-	clients map[*websocket.Conn]bool
+	clients   map[*websocket.Conn]bool
 	broadcast chan []byte
-	mutex sync.Mutex
+	mutex     sync.Mutex
+	upgrader  websocket.Upgrader
 }
 
 func NewWebSocketManager() *WebSocketManager {
 	return &WebSocketManager{
-		clients: make(map[*websocket.Conn]bool),
+		clients:   make(map[*websocket.Conn]bool),
 		broadcast: make(chan []byte),
+		upgrader: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				return true // Be cautious with this in production
+			},
+		},
 	}
+}
+
+func (manager *WebSocketManager) HandleWebSocket(c *gin.Context) {
+	conn, err := manager.upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Printf("Failed to upgrade connection: %v", err)
+		return
+	}
+	go manager.HandleConnections(conn)
 }
 
 func (manager *WebSocketManager) HandleConnections(conn *websocket.Conn) {

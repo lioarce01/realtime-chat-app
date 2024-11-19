@@ -12,9 +12,13 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+var _ ports.MessagePort = &MessageRepository{}
+
 type MessageRepository struct{}
 
-var _ ports.MessagePort = &MessageRepository{}
+func NewMessageRepository() *MessageRepository{
+	return &MessageRepository{}
+}
 
 func (r *MessageRepository) SendMessage(message *domain.Message) error {
 	collection := config.DB.Collection("messages")

@@ -3,7 +3,6 @@ package config
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -14,11 +13,12 @@ import (
 
 var DB *mongo.Database
 
-func LoadEnv() {
+func LoadEnv() error {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		return fmt.Errorf("error loading .env file: %w", err)
 	}
+	return nil
 }
 
 func GetMongoURI() string {
@@ -34,12 +34,12 @@ func GetPort() string {
 	return os.Getenv("PORT")
 }
 
-func ConnectDB() {
+func ConnectDB() (*mongo.Database, error) {
 	clientOptions := options.Client().ApplyURI(GetMongoURI())
 
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
-		log.Fatalf("Failed to connect to MongoDB: %v", err)
+		return nil, fmt.Errorf("failed to connect to MongoDB: %w", err)
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -47,9 +47,10 @@ func ConnectDB() {
 
 	err = client.Ping(ctx, nil)
 	if err != nil {
-		log.Fatalf("Failed to ping MongoDB: %v", err)
+		return nil, fmt.Errorf("failed to ping MongoDB: %w", err)
 	}
 
 	fmt.Println("Connected to MongoDB!")
 	DB = client.Database("chatapp")
+	return DB, nil
 }
