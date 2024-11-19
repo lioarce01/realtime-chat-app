@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"backend/internal/config"
+	"backend/config"
 	"errors"
 	"time"
 

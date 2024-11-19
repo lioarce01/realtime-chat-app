@@ -1,8 +1,8 @@
 package repository
 
 import (
-	domain "backend/internal/User/Domain"
-	"backend/internal/config"
+	"backend/config"
+	domain "backend/internal/Domain/User/Domain"
 	"backend/internal/utils"
 	"context"
 	"errors"

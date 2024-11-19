@@ -1,9 +1,9 @@
 package repository
 
 import (
-	domain "backend/internal/Chat/Domain"
-	ports "backend/internal/Chat/Ports"
-	"backend/internal/config"
+	"backend/config"
+	domain "backend/internal/Domain/Chat/Domain"
+	ports "backend/internal/Domain/Chat/Ports"
 	"context"
 	"fmt"
 	"log"

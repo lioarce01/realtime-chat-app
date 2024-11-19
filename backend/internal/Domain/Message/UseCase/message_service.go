@@ -1,10 +1,10 @@
 package usecase
 
 import (
-	CPorts "backend/internal/Chat/Ports"
-	domain "backend/internal/Message/Domain"
-	MPorts "backend/internal/Message/Ports"
-	"backend/internal/config"
+	"backend/config"
+	CPorts "backend/internal/Domain/Chat/Ports"
+	domain "backend/internal/Domain/Message/Domain"
+	MPorts "backend/internal/Domain/Message/Ports"
 	"backend/internal/services"
 	"log"
 	"time"

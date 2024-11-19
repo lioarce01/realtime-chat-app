@@ -1,6 +1,6 @@
 package ports
 
-import domain "backend/internal/User/Domain"
+import domain "backend/internal/Domain/User/Domain"
 
 type UserPort interface {
     Register(user *domain.User) error

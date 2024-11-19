@@ -1,9 +1,9 @@
 package repository
 
 import (
-	domain "backend/internal/Message/Domain"
-	ports "backend/internal/Message/Ports"
-	"backend/internal/config"
+	"backend/config"
+	domain "backend/internal/Domain/Message/Domain"
+	ports "backend/internal/Domain/Message/Ports"
 	"context"
 	"log"
 	"time"

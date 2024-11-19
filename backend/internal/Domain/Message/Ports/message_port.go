@@ -1,7 +1,7 @@
 package message
 
 import (
-	domain "backend/internal/Message/Domain"
+	domain "backend/internal/Domain/Message/Domain"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

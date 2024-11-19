@@ -2,7 +2,7 @@ package main
 
 import (
 	"backend/cmd/setup"
-	"backend/internal/config"
+	"backend/config"
 	"log"
 )
 

@@ -1,7 +1,7 @@
 package ports
 
 import (
-	domain "backend/internal/Chat/Domain"
+	domain "backend/internal/Domain/Chat/Domain"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

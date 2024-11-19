@@ -1,8 +1,8 @@
 package http
 
 import (
-	domain "backend/internal/User/Domain"
-	ports "backend/internal/User/Ports"
+	domain "backend/internal/Domain/User/Domain"
+	ports "backend/internal/Domain/User/Ports"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

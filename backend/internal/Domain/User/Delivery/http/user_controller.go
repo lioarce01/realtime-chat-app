@@ -1,7 +1,7 @@
 package http
 
 import (
-	usecase "backend/internal/User/UseCase"
+	usecase "backend/internal/Domain/User/UseCase"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

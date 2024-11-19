@@ -1,8 +1,8 @@
 package services
 
 import (
-	domain "backend/internal/Chat/Domain"
-	ports "backend/internal/Chat/Ports"
+	domain "backend/internal/Domain/Chat/Domain"
+	ports "backend/internal/Domain/Chat/Ports"
 	"fmt"
 	"log"
 
