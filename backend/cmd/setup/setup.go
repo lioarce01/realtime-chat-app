@@ -16,7 +16,9 @@ import (
 	UUseCase "backend/internal/Domain/User/UseCase"
 	"backend/internal/services"
 	"log"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -27,6 +29,15 @@ func Initialize() (*UserHTTP.AuthController, *ChatHTTP.ChatController, *MessageH
 
 	// Initialize Gin router
 	router := gin.Default()
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"}, 
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},                
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"}, 
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// Initialize repositories
 	userRepo, chatRepo, messageRepo := initializeRepositories()
