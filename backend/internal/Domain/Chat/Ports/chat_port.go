@@ -8,6 +8,7 @@ import (
 
 type ChatPort interface {
 	CreateChat(user1ID, user2ID primitive.ObjectID) (*domain.Chat, error)
+	GetChatByID(chatID primitive.ObjectID) (*domain.Chat, error)
 	GetChatsByUserID(userID primitive.ObjectID) ([]domain.Chat, error)
 	FindOrCreateChat(user1ID, user2ID primitive.ObjectID) (*domain.Chat, error)
 }

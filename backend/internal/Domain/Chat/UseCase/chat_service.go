@@ -31,6 +31,10 @@ func (s *ChatService) GetUserChats(userID primitive.ObjectID) ([]domain.Chat, er
 	return s.ChatRepo.GetChatsByUserID(userID)
 }
 
+func (s *ChatService) GetChatByID(chatID primitive.ObjectID) (*domain.Chat, error) {
+	return s.ChatRepo.GetChatByID(chatID)
+}
+
 func (s *ChatService) FindOrCreateChat(user1ID, user2ID primitive.ObjectID) (*domain.Chat, error) {
 	chat, err := s.ChatRepo.FindOrCreateChat(user1ID, user2ID)
 	if err == nil {

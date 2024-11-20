@@ -15,10 +15,10 @@ func NewUserController(userService *usecase.UserService) *UserController {
     return &UserController{UserService: userService}
 }
 
-func (controller *UserController) GetUserByID(c *gin.Context) {
-    userID := c.Param("id")
+func (controller *UserController) GetUserBySubOrID(c *gin.Context) {
+    userSUB := c.Param("id")
 
-    user, err := controller.UserService.GetUserByID(userID)
+    user, err := controller.UserService.GetUserBySubOrID(userSUB)
     if err != nil {
         c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
         return
@@ -26,6 +26,7 @@ func (controller *UserController) GetUserByID(c *gin.Context) {
 
     c.JSON(http.StatusOK, gin.H{"user": user})
 }
+
 
 func (controller *UserController) GetAllUsers(c *gin.Context) {
     users, err := controller.UserService.GetAllUsers()

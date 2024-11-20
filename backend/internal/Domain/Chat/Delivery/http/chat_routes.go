@@ -15,4 +15,5 @@ func NewChatRoutes(chatController *ChatController) * ChatRoutes {
 func (c *ChatRoutes) RegisterChatRoutes(r *gin.Engine) {
 	r.POST("/create-chat", c.ChatController.CreateChat)
 	r.GET("/users/:id/chats",c.ChatController.GetUserChats)
+	r.GET("/chats/:id", c.ChatController.GetChatByID)
 }

@@ -2,11 +2,12 @@ package repository
 
 import (
 	"backend/config"
+	chatDomain "backend/internal/Domain/Chat/Domain"
 	domain "backend/internal/Domain/User/Domain"
 	ports "backend/internal/Domain/User/Ports"
-	"backend/internal/utils"
 	"context"
 	"errors"
+	"fmt"
 	"log"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,7 +15,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var _ ports.UserPort = &UserRepository{}
+var _ ports.UserPort = &UserRepository{
+    
+}
 
 type UserRepository struct{}
 
@@ -30,36 +33,8 @@ func (r *UserRepository) Register(user *domain.User) error {
         return errors.New("email already registered")
     }
 
-    hashedPassword, err := utils.HashPassword(user.Password)
-    if err != nil {
-        log.Println("Error hashing password:", err)
-        return err
-    }
-    user.Password = hashedPassword
-
     _, err = collection.InsertOne(context.TODO(), user)
     return err
-}
-
-func (r *UserRepository) Login(email, password string) (string, error) {
-    collection := config.DB.Collection("users")
-    var user domain.User
-
-    err := collection.FindOne(context.TODO(), bson.M{"email": email}).Decode(&user)
-    if err != nil {
-        return "", errors.New("invalid credentials")
-    }
-
-    if !utils.CheckPasswordHash(password, user.Password) {
-        return "", errors.New("invalid credentials")
-    }
-
-    token, err := utils.GenerateJWT(user.ID.Hex(), user.Email)
-    if err != nil {
-        return "", err
-    }
-
-    return token, nil
 }
 
 func (r *UserRepository) GetAllUsers() ([]domain.User, error) {
@@ -85,19 +60,50 @@ func (r *UserRepository) GetAllUsers() ([]domain.User, error) {
     return users, cursor.Err()
 }
 
-func (r *UserRepository) GetUserByID(id string) (*domain.User, error) {
-    collection := config.DB.Collection("users")
+func (r *UserRepository) GetUserBySubOrID(identifier string) (*domain.User, error) {
+    userCollection := config.DB.Collection("users")
+    chatCollection := config.DB.Collection("chats")
+
     var user domain.User
 
-    objectID, err := primitive.ObjectIDFromHex(id)
-    if err != nil {
-        return nil, errors.New("invalid user ID format")
+    // Filtrar usuario por ID o SUB
+    objectID, err := primitive.ObjectIDFromHex(identifier)
+    var filter bson.M
+
+    if err == nil {
+        filter = bson.M{"_id": objectID}
+    } else {
+        filter = bson.M{"sub": identifier}
     }
 
-    err = collection.FindOne(context.TODO(), bson.M{"_id": objectID}).Decode(&user)
+    err = userCollection.FindOne(context.TODO(), filter).Decode(&user)
     if err != nil {
-        return nil, errors.New("user not found")
+        return nil, fmt.Errorf("user not found")
     }
+
+    chatFilter := bson.M{
+        "$or": []bson.M{
+            {"user1_id": user.ID},
+            {"user2_id": user.ID},
+        },
+    }
+
+    cursor, err := chatCollection.Find(context.TODO(), chatFilter)
+    if err != nil {
+        return nil, fmt.Errorf("error fetching chats: %v", err)
+    }
+    defer cursor.Close(context.TODO())
+
+    var chatIDs []chatDomain.Chat
+    for cursor.Next(context.TODO()) {
+        var chat chatDomain.Chat
+        if err := cursor.Decode(&chat); err != nil {
+            return nil, fmt.Errorf("error decoding chat: %v", err)
+        }
+        chatIDs = append(chatIDs, chat)
+    }
+
+    user.Chats = chatIDs
 
     return &user, nil
 }

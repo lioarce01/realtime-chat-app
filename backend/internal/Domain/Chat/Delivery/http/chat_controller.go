@@ -72,3 +72,21 @@ func (controller *ChatController) GetUserChats(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"chats": chats})
 }
+
+func (controller *ChatController) GetChatByID(c *gin.Context) {
+	chatIDParam := c.Param("id")
+
+	chatID, err := primitive.ObjectIDFromHex(chatIDParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid chat ID"})
+		return
+	}
+
+	chat, err := controller.ChatService.GetChatByID(chatID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not retrieve chat"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"chat": chat})
+}

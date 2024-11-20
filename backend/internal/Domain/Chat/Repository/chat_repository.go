@@ -4,6 +4,7 @@ import (
 	"backend/config"
 	domain "backend/internal/Domain/Chat/Domain"
 	ports "backend/internal/Domain/Chat/Ports"
+	messageDomain "backend/internal/Domain/Message/Domain"
 	"context"
 	"fmt"
 	"log"
@@ -11,6 +12,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var _ ports.ChatPort = &ChatRepository{}
@@ -52,6 +54,40 @@ func (r *ChatRepository) CreateChat(user1ID, user2ID primitive.ObjectID) (*domai
 	return chat, nil
 }
 
+func (r *ChatRepository) GetChatByID(chatID primitive.ObjectID) (*domain.Chat, error) {
+	chatCollection := config.DB.Collection("chats")
+	messageCollection := config.DB.Collection("messages")
+
+	var chat domain.Chat
+
+	filter := bson.M{"_id": chatID}
+	err := chatCollection.FindOne(context.TODO(), filter).Decode(&chat)
+	if err != nil {
+		return nil, fmt.Errorf("chat not found")
+	}
+
+	messageFilter := bson.M{
+		"chat_id": chatID,
+	}
+	cursor, err := messageCollection.Find(context.TODO(), messageFilter)
+	if err != nil {
+		return nil, fmt.Errorf("error fetching messages: %v", err)
+	}
+	defer cursor.Close(context.TODO())
+
+	var messages []messageDomain.Message
+	for cursor.Next(context.TODO()) {
+		var message messageDomain.Message
+		if err := cursor.Decode(&message); err != nil {
+			return nil, fmt.Errorf("error decoding message: %v", err)
+		}
+		messages = append(messages, message)
+	}
+	chat.Messages = messages
+
+	return &chat, nil
+}
+
 func (r *ChatRepository) GetChatsByUserID(userID primitive.ObjectID) ([]domain.Chat, error) {
 	collection := config.DB.Collection("chats")
 	var chats []domain.Chat
@@ -89,6 +125,23 @@ func (r *ChatRepository) FindOrCreateChat(user1ID, user2ID primitive.ObjectID) (
 
 	err := collection.FindOne(context.TODO(), filter).Decode(&chat)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			chat := domain.Chat{
+				User1ID:   user1ID,
+				User2ID:   user2ID,
+				CreatedAt: time.Now(),
+			}
+
+			result, err := collection.InsertOne(context.TODO(), chat)
+			if err != nil {
+				log.Println("Error creating chat:", err)
+				return nil, fmt.Errorf("error creating chat")
+			}
+
+			chat.ID = result.InsertedID.(primitive.ObjectID)
+			return &chat, nil
+		}
+
 		log.Println("Error finding chat:", err)
 		return nil, fmt.Errorf("chat not found")
 	}

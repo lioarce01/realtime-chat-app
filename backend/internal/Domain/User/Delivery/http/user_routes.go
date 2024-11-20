@@ -18,8 +18,8 @@ func NewUserRoutes(userController *UserController, authController *AuthControlle
 
 func (u *UserRoutes) RegisterUserRoutes(r *gin.Engine) {
 	r.POST("/register", u.AuthController.Register)
-	r.POST("/login", u.AuthController.Login)
+	// r.POST("/login", u.AuthController.Login)
 
 	r.GET("/users", u.UserController.GetAllUsers)
-	r.GET("/users/:id", u.UserController.GetUserByID)
+	r.GET("/users/:id", u.UserController.GetUserBySubOrID)
 }

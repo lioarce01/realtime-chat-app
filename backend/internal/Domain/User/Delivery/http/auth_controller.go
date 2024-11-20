@@ -26,8 +26,8 @@ func (c *AuthController) Register(ctx *gin.Context) {
 		return
 	}
 
-	if user.Email == "" || user.Password == "" {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Email and password are required"})
+	if user.Email == "" || user.Username == "" {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Email and username are required."})
 		return
 	}
 
@@ -44,18 +44,18 @@ func (c *AuthController) Register(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, gin.H{"message": "User registered successfully"})
 }
 
-func (c *AuthController) Login(ctx *gin.Context) {
-	var creds domain.User
-	if err := ctx.ShouldBindJSON(&creds); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid credentials"})
-		return
-	}
+// func (c *AuthController) Login(ctx *gin.Context) {
+// 	var creds domain.User
+// 	if err := ctx.ShouldBindJSON(&creds); err != nil {
+// 		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid credentials"})
+// 		return
+// 	}
 
-	token, err := c.UserPort.Login(creds.Email, creds.Password)
-	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
-		return
-	}
+// 	token, err := c.UserPort.Login(creds.Email, creds.Password)
+// 	if err != nil {
+// 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+// 		return
+// 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"token": token})
-}
+// 	ctx.JSON(http.StatusOK, gin.H{"token": token})
+// }
