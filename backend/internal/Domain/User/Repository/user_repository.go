@@ -66,7 +66,6 @@ func (r *UserRepository) GetUserBySubOrID(identifier string) (*domain.User, erro
 
     var user domain.User
 
-    // Filtrar usuario por ID o SUB
     objectID, err := primitive.ObjectIDFromHex(identifier)
     var filter bson.M
 

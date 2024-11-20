@@ -49,7 +49,7 @@ func Initialize() (*UserHTTP.AuthController, *ChatHTTP.ChatController, *MessageH
 	webSocketService := initializeWebSocketService()
 	chatService := CUseCase.NewChatService(chatPort)
 	userService := UUseCase.NewUserService(userPort)
-	messageService := MUseCase.NewMessageService(webSocketService, messagePort, chatPort)
+	messageService := MUseCase.NewMessageService(userPort, webSocketService, messagePort, chatPort)
 
 	// Start WebSocket broadcasting
 	go webSocketService.BroadcastMessages()
