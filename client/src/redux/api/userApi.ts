@@ -4,13 +4,34 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const userApi = createApi({
   reducerPath: "userApi",
-  baseQuery: fetchBaseQuery({ baseUrl: API_URL }),
+  baseQuery: fetchBaseQuery({ baseUrl: API_URL, credentials: "include" }),
   tagTypes: ["User"],
   endpoints: (builder) => ({
     getAllUsers: builder.query({
       query: () => "/users",
     }),
+    registerUser: builder.mutation({
+      query: (user) => {
+        return {
+          url: "/register",
+          method: "POST",
+          body: user,
+        };
+      },
+    }),
+    getUserById: builder.query({
+      query: (id) => `/users/${id}`,
+    }),
+    getUserChats: builder.query({
+      query: (id) => `/users/${id}/chats`,
+    }),
   }),
 });
 
-export const { useGetAllUsersQuery } = userApi;
+export const {
+  useGetAllUsersQuery,
+  useRegisterUserMutation,
+  useGetUserByIdQuery,
+  useGetUserChatsQuery,
+  useLazyGetUserByIdQuery,
+} = userApi;

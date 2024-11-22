@@ -3,6 +3,7 @@ import { persistReducer, persistStore } from "redux-persist";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
 import userReducer from "@/redux/slices/userSlice";
 import { userApi } from "./api/userApi";
+import { chatApi } from "./api/chatApi";
 
 const createNoopStorage = () => {
   return {
@@ -30,6 +31,7 @@ const persistConfig = {
 };
 
 const rootReducer = combineReducers({
+  [chatApi.reducerPath]: chatApi.reducer,
   [userApi.reducerPath]: userApi.reducer,
   user: userReducer,
 });
@@ -50,7 +52,7 @@ export const store = configureStore({
           "persist/REGISTER",
         ],
       },
-    }).concat(userApi.middleware),
+    }).concat(userApi.middleware, chatApi.middleware),
 });
 
 export const persistor = persistStore(store);
