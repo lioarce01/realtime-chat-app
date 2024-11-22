@@ -13,6 +13,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var _ ports.ChatPort = &ChatRepository{}
@@ -89,10 +90,14 @@ func (r *ChatRepository) GetChatByID(chatID primitive.ObjectID) (*domain.Chat, e
 }
 
 func (r *ChatRepository) GetChatsByUserID(userID primitive.ObjectID) ([]domain.Chat, error) {
-	collection := config.DB.Collection("chats")
+	chatCollection := config.DB.Collection("chats")
+	userCollection := config.DB.Collection("users")
+	messageCollection := config.DB.Collection("messages")
+
 	var chats []domain.Chat
 
-	cursor, err := collection.Find(context.TODO(), bson.M{
+	// Encuentra los chats del usuario
+	cursor, err := chatCollection.Find(context.TODO(), bson.M{
 		"$or": []bson.M{
 			{"user1_id": userID},
 			{"user2_id": userID},
@@ -104,13 +109,56 @@ func (r *ChatRepository) GetChatsByUserID(userID primitive.ObjectID) ([]domain.C
 	}
 	defer cursor.Close(context.TODO())
 
+	// Decodifica los chats encontrados
 	if err := cursor.All(context.TODO(), &chats); err != nil {
 		log.Println("Error decoding chats:", err)
 		return nil, err
 	}
 
+	// Obtén los detalles de los usuarios y el último mensaje para cada chat
+	for i := range chats {
+		// Busca User1
+		var user1 domain.UserDetail
+		err := userCollection.FindOne(context.TODO(), bson.M{"_id": chats[i].User1ID}).Decode(&user1)
+		if err != nil {
+			log.Println("Error fetching user1 details:", err)
+			continue
+		}
+		chats[i].User1 = &user1
+
+		// Busca User2
+		var user2 domain.UserDetail
+		err = userCollection.FindOne(context.TODO(), bson.M{"_id": chats[i].User2ID}).Decode(&user2)
+		if err != nil {
+			log.Println("Error fetching user2 details:", err)
+			continue
+		}
+		chats[i].User2 = &user2
+
+		// Busca el último mensaje del chat
+		var lastMessage *messageDomain.Message
+		messageCursor, err := messageCollection.Find(context.TODO(), bson.M{"chat_id": chats[i].ID}, &options.FindOptions{
+			Sort: bson.D{{Key: "created_at", Value: -1}},
+			Limit: pointerToInt64(1),
+		})
+		if err != nil {
+			log.Println("Error fetching last message:", err)
+			continue
+		}
+		defer messageCursor.Close(context.TODO())
+
+		if messageCursor.Next(context.TODO()) {
+			if err := messageCursor.Decode(&lastMessage); err != nil {
+				log.Println("Error decoding last message:", err)
+				continue
+			}
+		}
+		chats[i].LastMessage = lastMessage
+	}
+
 	return chats, nil
 }
+
 
 func (r *ChatRepository) FindOrCreateChat(user1ID, user2ID primitive.ObjectID) (*domain.Chat, error) {
 	collection := config.DB.Collection("chats")
@@ -147,4 +195,8 @@ func (r *ChatRepository) FindOrCreateChat(user1ID, user2ID primitive.ObjectID) (
 	}
 
 	return &chat, nil
+}
+
+func pointerToInt64(i int64) *int64 {
+	return &i
 }
