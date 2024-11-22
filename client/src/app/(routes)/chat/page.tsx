@@ -6,17 +6,7 @@ import { useGetUserByIdQuery } from "@/redux/api/userApi";
 import AuthSyncWrapper from "@/components/auth/AuthSyncWrapper";
 import { useAuth0 } from "@auth0/auth0-react";
 import Chat from "@/components/chat/Chat";
-import ChatInput from "@/components/chat/Input";
 import Sidebar from "@/components/chat/SidebarChat";
-
-interface ChatContact {
-  id: string;
-  user1_id: string;
-  user2_id: string;
-  created_at?: string;
-  updated_at?: string;
-  messages?: any[];
-}
 
 const ChatPage = () => {
   const { user } = useAuth0();
@@ -43,17 +33,8 @@ const ChatPage = () => {
               setSelectedChatId={setSelectedChatId}
               selectedChatId={selectedChatId}
             />
-            {/* Chat Window */}
             <div className="flex-1 flex flex-col bg-neutral-950">
-              {/* Chat Messages */}
               <Chat chatId={selectedChatId} dbUserId={dbUserId} />
-
-              {/* Input Bar */}
-              {/* <ChatInput
-                inputMessage={inputMessage}
-                setInputMessage={setInputMessage}
-                handleSendMessage={handleSendMessage}
-              /> */}
             </div>
           </div>
         </motion.div>

@@ -21,7 +21,15 @@ export const chatApi = createApi({
         { type: "Chat", id: chat_id },
       ],
     }),
+    getMessagesByChatId: builder.query({
+      query: (id) => `/chats/${id}/messages`,
+      providesTags: (result, error, id) => [{ type: "Chat", id }],
+    }),
   }),
 });
 
-export const { useGetChatByIdQuery, useSendMessageMutation } = chatApi;
+export const {
+  useGetChatByIdQuery,
+  useSendMessageMutation,
+  useGetMessagesByChatIdQuery,
+} = chatApi;
