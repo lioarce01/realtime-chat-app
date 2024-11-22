@@ -89,7 +89,6 @@ func (service *MessageService) SendMessage(senderID, receiverID primitive.Object
 
 
 func (service *MessageService) GetMessagesByChatID(chatID primitive.ObjectID) ([]domain.Message, error) {
-	// Retrieve enriched messages with sender and receiver details from the repository
 	messages, err := service.MessageRepo.GetMessagesByChatID(chatID)
 	if err != nil {
 		log.Println("Error retrieving messages:", err)
