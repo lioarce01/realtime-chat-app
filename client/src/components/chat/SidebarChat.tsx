@@ -1,5 +1,5 @@
 import React from "react";
-import { useGetUserByIdQuery } from "@/redux/api/userApi";
+import { useGetUserByIdQuery, useGetUserChatsQuery } from "@/redux/api/userApi";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { AvatarImage } from "@radix-ui/react-avatar";
 
@@ -14,9 +14,15 @@ const Sidebar: React.FC<SidebarProps> = ({
   setSelectedChatId,
   selectedChatId,
 }) => {
-  const { data, isLoading, error } = useGetUserByIdQuery(userId);
+  const { data, isLoading, error } = useGetUserByIdQuery(userId, {
+    skip: !userId,
+  });
 
-  const chats = data?.user?.chats ?? [];
+  const { data: chatsData } = useGetUserChatsQuery(data?.user?.id, {
+    skip: !data?.user?.id,
+  });
+
+  const chats = chatsData?.chats;
 
   if (isLoading) {
     return <div className="w-1/3 p-4">Loading chats...</div>;
@@ -32,7 +38,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <h1 className="text-2xl font-bold">Chats</h1>
       </div>
       <div className="flex-1 overflow-y-auto">
-        {chats.length > 0 ? (
+        {chats ? (
           chats.map((chat: any) => (
             <div
               key={chat.id}
@@ -43,17 +49,23 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               <Avatar>
                 <AvatarImage
-                  src={`https://api.dicebear.com/6.x/initials/svg?seed=${
-                    chat.user1_id === userId ? chat.user2_id : chat.user1_id
-                  }`}
+                  src={
+                    chat.user1_id === userId
+                      ? chat.user2?.profile_pic
+                      : chat.user1?.profile_pic
+                  }
                 />
                 <AvatarFallback>?</AvatarFallback>
               </Avatar>
               <div className="ml-3">
                 <h2 className="font-bold">
-                  Chat with{" "}
-                  {chat.user1_id === userId ? chat.user2_id : chat.user1_id}
+                  {chat.user1_id === userId
+                    ? chat.user2?.username
+                    : chat.user1?.username}
                 </h2>
+                <p className="text-sm text-gray-500">
+                  {chat.last_message?.content}
+                </p>
               </div>
             </div>
           ))
