@@ -23,4 +23,5 @@ type Chat struct {
 type UserDetail struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"id"`
 	Username string              `bson:"username" json:"username"`
+	ProfilePic string            `bson:"profile_pic" json:"profile_pic"`
 }
