@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import {
   useGetChatByIdQuery,
@@ -50,11 +50,23 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
   const wsRef = useRef<ReconnectingWebSocket | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return "Invalid Date";
+    }
+    return date.toISOString();
+  };
+
   useEffect(() => {
     if (data?.chat?.messages) {
       setMessages(data.chat.messages);
     }
   }, [data]);
+
+  const handleNewMessage = useCallback((newMessage: Message) => {
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+  }, []);
 
   useEffect(() => {
     if (!chatId || !dbUserId) return;
@@ -70,7 +82,11 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
     ws.onmessage = (event) => {
       try {
         const newMessage = JSON.parse(event.data);
-        setMessages((prev) => [...prev, newMessage]);
+        console.log("received message:", newMessage);
+        if (newMessage.chat_id === chatId) {
+          newMessage.created_at = formatDate(newMessage.created_at);
+          handleNewMessage(newMessage);
+        }
       } catch (error) {
         console.log("Received plain text message:", event.data);
         if (typeof event.data === "string") {
@@ -79,10 +95,12 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
             sender: { id: "", username: "", profile_pic: "" },
             receiver: { id: "", username: "", profile_pic: "" },
             content: event.data,
-            created_at: new Date().toISOString(),
+            created_at: new Date().toLocaleString(),
             chat_id: chatId,
           };
-          setMessages((prev) => [...prev, newMessage]);
+          if (newMessage.chat_id === chatId) {
+            handleNewMessage(newMessage);
+          }
         } else {
           console.error("Error parsing WebSocket message:", error);
         }
@@ -102,7 +120,7 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
         wsRef.current.close();
       }
     };
-  }, [chatId, dbUserId]);
+  }, [chatId, dbUserId, handleNewMessage]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -120,20 +138,17 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
 
       const response = await sendMessage(messageData).unwrap();
 
-      const newMessage: Message = {
-        id: response.id || Date.now().toString(),
-        sender: { id: dbUserId, username: "", profile_pic: "" },
-        receiver: { id: receiverUser || "", username: "", profile_pic: "" },
-        content: inputMessage,
-        created_at: new Date().toISOString(),
-        chat_id: chatId,
-      };
-      setMessages((prev) => [...prev, newMessage]);
+      handleNewMessage(response);
 
       setInputMessage("");
     } catch (error) {
       console.error("Failed to send message:", error);
     }
+  };
+
+  const displayDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleString();
   };
 
   if (!chatId) {
@@ -186,23 +201,23 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
         <span className="text-sm text-neutral-400">Online</span>
       </div>
       <div className="flex-1 overflow-y-auto p-4">
-        {messages.map((message: Message) => (
+        {messages?.map((message: Message, index: number) => (
           <div
-            key={message.id}
+            key={message.id || `message-${index}`}
             className={`mb-4 flex ${
-              message.sender.id === dbUserId ? "justify-end" : "justify-start"
+              message.sender?.id === dbUserId ? "justify-end" : "justify-start"
             }`}
           >
             <div
               className={`max-w-sm p-3 rounded-lg shadow ${
-                message.sender.id === dbUserId
+                message.sender?.id === dbUserId
                   ? "bg-blue-600 text-white"
                   : "bg-neutral-800 text-white"
               }`}
             >
               <p className="text-sm">{message.content}</p>
               <p className="text-xs text-neutral-400 text-right mt-1">
-                {new Date(message.created_at).toLocaleString()}
+                {displayDate(message.created_at)}
               </p>
             </div>
           </div>
