@@ -1,9 +1,6 @@
 import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-
-interface ReceiverProfileProps {
-  receiverData: any;
-}
+import { ReceiverProfileProps } from "@/types/UserTypes";
 
 const ReceiverProfile: React.FC<ReceiverProfileProps> = ({ receiverData }) => {
   return (

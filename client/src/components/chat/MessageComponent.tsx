@@ -1,10 +1,5 @@
+import { Message, MessagesProps } from "@/types/MessageTypes";
 import React, { useEffect, useRef } from "react";
-import { Message } from "./Chat";
-
-interface MessagesProps {
-  messages: Message[];
-  dbUserId: string | undefined;
-}
 
 const MessageComponent: React.FC<MessagesProps> = ({ messages, dbUserId }) => {
   const displayDate = (dateString: string) => {

@@ -9,28 +9,8 @@ import ReconnectingWebSocket from "reconnecting-websocket";
 import { useGetUserByIdQuery } from "@/redux/api/userApi";
 import MessageComponent from "./MessageComponent";
 import ReceiverProfile from "./ReceiverProfile";
-
-interface ChatProps {
-  chatId: string | null;
-  dbUserId: string | undefined;
-}
-
-export interface Message {
-  id: string;
-  sender: {
-    id: string;
-    username: string;
-    profile_pic: string;
-  };
-  receiver: {
-    id: string;
-    username: string;
-    profile_pic: string;
-  };
-  content: string;
-  created_at: string;
-  chat_id: string;
-}
+import { Message } from "@/types/MessageTypes";
+import { ChatProps } from "@/types/ChatTypes";
 
 const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
   const { data } = useGetChatByIdQuery(chatId ?? "", {

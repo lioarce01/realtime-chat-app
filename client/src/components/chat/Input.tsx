@@ -4,12 +4,7 @@ import React from "react";
 import { Button } from "../ui/button";
 import { Send } from "lucide-react";
 import { Input } from "../ui/input";
-
-interface ChatInputProps {
-  inputMessage: string;
-  setInputMessage: React.Dispatch<React.SetStateAction<string>>;
-  handleSendMessage: () => void;
-}
+import { ChatInputProps } from "@/types/ChatTypes";
 
 const ChatInput: React.FC<ChatInputProps> = ({
   inputMessage,
