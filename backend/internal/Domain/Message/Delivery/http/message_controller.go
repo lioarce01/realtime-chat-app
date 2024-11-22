@@ -51,19 +51,19 @@ func (controller *MessageController) SendMessage(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": message})
 }
 
-func (controller *MessageController) GetChatMessages(c *gin.Context) {
-	chatIDParam := c.Param("id")
-	chatID, err := primitive.ObjectIDFromHex(chatIDParam)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid chat ID"})
-		return
-	}
+func (c *MessageController) GetChatMessages(g *gin.Context) {
+    chatIDParam := g.Param("id")
+    chatID, err := primitive.ObjectIDFromHex(chatIDParam)
+    if err != nil {
+        g.JSON(http.StatusBadRequest, gin.H{"error": "Invalid chat ID"})
+        return
+    }
 
-	messages, err := controller.MessageService.GetMessagesByChatID(chatID)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve messages"})
-		return
-	}
+    messages, err := c.MessageService.GetMessagesByChatID(chatID)
+    if err != nil {
+        g.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve messages"})
+        return
+    }
 
-	c.JSON(http.StatusOK, gin.H{"messages": messages})
+    g.JSON(http.StatusOK, gin.H{"messages": messages})
 }
