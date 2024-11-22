@@ -38,7 +38,7 @@ func (service *MessageService) SendMessage(senderID, receiverID primitive.Object
 		return nil, err
 	}
 
-	senderIDStr := senderID.Hex() 
+	senderIDStr := senderID.Hex()
 	receiverIDStr := receiverID.Hex()
 
 	sender, err := service.UserRepo.GetUserBySubOrID(senderIDStr)
@@ -54,23 +54,23 @@ func (service *MessageService) SendMessage(senderID, receiverID primitive.Object
 	}
 
 	senderDetail := domain.UserDetail{
-		ID:         sender.ID,
-		Username:   sender.Username,
+		ID:          sender.ID,
+		Username:    sender.Username,
 		Profile_Pic: sender.Profile_Pic,
 	}
 
 	receiverDetail := domain.UserDetail{
-		ID:         receiver.ID,
-		Username:   receiver.Username,
+		ID:          receiver.ID,
+		Username:    receiver.Username,
 		Profile_Pic: receiver.Profile_Pic,
 	}
 
 	message := &domain.Message{
-		Sender:   senderDetail,  
-		Receiver: receiverDetail, 
-		Content:  content,
+		Sender:    senderDetail,
+		Receiver:  receiverDetail,
+		Content:   content,
 		CreatedAt: time.Now(),
-		ChatID:   chat.ID,
+		ChatID:    chat.ID,
 	}
 
 	collection := config.DB.Collection("messages")
@@ -82,7 +82,14 @@ func (service *MessageService) SendMessage(senderID, receiverID primitive.Object
 
 	message.ID = result.InsertedID.(primitive.ObjectID)
 
-	service.WebSocketManager.BroadcastMessage([]byte(content))
+	wsMessage := services.Message{
+		SenderID:   senderIDStr,
+		ReceiverID: receiverIDStr,
+		Content:    content,
+		ChatID:     chat.ID.Hex(),
+		CreatedAt: message.CreatedAt,
+	}
+	service.WebSocketManager.BroadcastMessage(wsMessage)
 
 	return message, nil
 }

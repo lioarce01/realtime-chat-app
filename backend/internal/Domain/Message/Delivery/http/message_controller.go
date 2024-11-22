@@ -20,13 +20,13 @@ func NewMessageController(messageService *usecase.MessageService) *MessageContro
 
 func (controller *MessageController) SendMessage(c *gin.Context) {
 	var messageRequest struct {
-		SenderID   string `json:"sender_id"`
-		ReceiverID string `json:"receiver_id"`
-		Content    string `json:"content"`
+		SenderID   string `json:"sender_id" binding:"required"`
+		ReceiverID string `json:"receiver_id" binding:"required"`
+		Content    string `json:"content" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&messageRequest); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -44,7 +44,7 @@ func (controller *MessageController) SendMessage(c *gin.Context) {
 
 	message, err := controller.MessageService.SendMessage(senderID, receiverID, messageRequest.Content)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to send message"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

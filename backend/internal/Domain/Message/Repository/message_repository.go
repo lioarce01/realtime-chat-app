@@ -33,7 +33,6 @@ func (r *MessageRepository) GetMessagesByChatID(chatID primitive.ObjectID) ([]do
 
     var messages []domain.Message
 
-    // Query for messages based on chat_id
     cursor, err := messagesCollection.Find(context.TODO(), bson.M{"chat_id": chatID})
     if err != nil {
         log.Printf("Error querying messages: %v", err)
@@ -41,7 +40,6 @@ func (r *MessageRepository) GetMessagesByChatID(chatID primitive.ObjectID) ([]do
     }
     defer cursor.Close(context.TODO())
 
-    // Retrieve all messages
     if err := cursor.All(context.TODO(), &messages); err != nil {
         log.Printf("Error retrieving messages from cursor: %v", err)
         return nil, err
@@ -49,13 +47,10 @@ func (r *MessageRepository) GetMessagesByChatID(chatID primitive.ObjectID) ([]do
 
     var enrichedMessages []domain.Message
 
-    // Iterate over each message and enrich with sender and receiver details
     for _, message := range messages {
-        // Log the sender and receiver IDs to ensure correct IDs
         log.Printf("Fetching Sender and Receiver for Message ID %v: SenderID %v, ReceiverID %v", 
                     message.ID, message.Sender.ID, message.Receiver.ID)
 
-        // Retrieve the sender user object
         var sender domain.UserDetail
         err := usersCollection.FindOne(context.TODO(), bson.M{"_id": message.Sender.ID}).Decode(&sender)
         if err != nil {
@@ -67,7 +62,6 @@ func (r *MessageRepository) GetMessagesByChatID(chatID primitive.ObjectID) ([]do
             return nil, err
         }
 
-        // Retrieve the receiver user object
         var receiver domain.UserDetail
         err = usersCollection.FindOne(context.TODO(), bson.M{"_id": message.Receiver.ID}).Decode(&receiver)
         if err != nil {
@@ -79,18 +73,14 @@ func (r *MessageRepository) GetMessagesByChatID(chatID primitive.ObjectID) ([]do
             return nil, err
         }
 
-        // Log the retrieved sender and receiver to ensure correct user details
         log.Printf("Sender: %+v", sender)
         log.Printf("Receiver: %+v", receiver)
 
-        // Assign the sender and receiver to the message
         message.Sender = sender
         message.Receiver = receiver
 
-        // Append the enriched message to the result list
         enrichedMessages = append(enrichedMessages, message)
     }
 
-    // Return the enriched messages
     return enrichedMessages, nil
 }
