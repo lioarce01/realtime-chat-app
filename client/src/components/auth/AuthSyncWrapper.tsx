@@ -7,7 +7,13 @@ const AuthSyncWrapper = ({ children }: { children: ReactNode }) => {
 
   useSyncAuth0WithBackend();
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading)
+    return (
+      <div className="w-full bg-black bg-opacity-50 h-screen flex text-white justify-center items-center">
+        {" "}
+        Loading...
+      </div>
+    );
   if (!isAuthenticated) return <p>Please log in.</p>;
 
   return <>{children}</>;

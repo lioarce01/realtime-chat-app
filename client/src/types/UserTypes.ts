@@ -3,6 +3,7 @@ export interface ReceiverProfileProps {
 }
 
 export interface SidebarProps {
+  chats?: any[];
   userId: string;
   setSelectedChatId: (chatId: string | null) => void;
   selectedChatId: string | null;
