@@ -11,7 +11,6 @@ export default function Home() {
         <p className="">Create an account to start chatting</p>
       </div>
       <LoginButton />
-      <LogoutButton />
     </div>
   );
 }

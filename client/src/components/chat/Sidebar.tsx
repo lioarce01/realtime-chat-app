@@ -2,11 +2,13 @@ import React from "react";
 import { useGetUserByIdQuery, useGetUserChatsQuery } from "@/redux/api/userApi";
 import { SidebarProps } from "@/types/UserTypes";
 import SidebarChats from "./SidebarChats";
+import UserMenu from "./UserMenu";
 
 const Sidebar: React.FC<SidebarProps> = ({
   userId,
   setSelectedChatId,
   selectedChatId,
+  dbUser,
 }) => {
   const { data, error } = useGetUserByIdQuery(userId, {
     skip: !userId,
@@ -24,8 +26,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <div className="w-1/3 bg-neutral-900 border-r border-neutral-800 flex flex-col">
-      <div className="p-4">
+      <div className="p-4 flex justify-between items-center">
         <h1 className="text-2xl font-bold">Chats</h1>
+        <UserMenu dbUser={dbUser} />
       </div>
       <SidebarChats
         chats={chats}

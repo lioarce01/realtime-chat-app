@@ -7,4 +7,9 @@ export interface SidebarProps {
   userId: string;
   setSelectedChatId: (chatId: string | null) => void;
   selectedChatId: string | null;
+  dbUser?: any;
+}
+
+export interface UserMenuProps {
+  dbUser: any;
 }

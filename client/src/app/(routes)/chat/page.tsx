@@ -6,7 +6,7 @@ import { useGetUserByIdQuery } from "@/redux/api/userApi";
 import AuthSyncWrapper from "@/components/auth/AuthSyncWrapper";
 import { useAuth0 } from "@auth0/auth0-react";
 import Chat from "@/components/chat/Chat";
-import Sidebar from "@/components/chat/SidebarChat";
+import Sidebar from "@/components/chat/Sidebar";
 
 const ChatPage = () => {
   const { user } = useAuth0();
@@ -32,6 +32,7 @@ const ChatPage = () => {
               userId={user?.sub!}
               setSelectedChatId={setSelectedChatId}
               selectedChatId={selectedChatId}
+              dbUser={dbUser}
             />
             <div className="flex-1 flex flex-col bg-neutral-950">
               <Chat chatId={selectedChatId} dbUserId={dbUserId} />

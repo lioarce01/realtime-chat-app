@@ -12,13 +12,17 @@ const LogoutButton = () => {
   };
 
   return (
-    <div>
+    <>
       {isAuthenticated && (
-        <Button disabled={isLoading} onClick={handleLogout}>
+        <button
+          disabled={isLoading}
+          onClick={handleLogout}
+          className="w-full text-left"
+        >
           Logout
-        </Button>
+        </button>
       )}
-    </div>
+    </>
   );
 };
 
