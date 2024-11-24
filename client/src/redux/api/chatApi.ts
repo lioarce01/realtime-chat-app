@@ -32,4 +32,5 @@ export const {
   useGetChatByIdQuery,
   useSendMessageMutation,
   useGetMessagesByChatIdQuery,
+  useLazyGetMessagesByChatIdQuery,
 } = chatApi;

@@ -11,6 +11,7 @@ import MessageComponent from "./MessageComponent";
 import ReceiverProfile from "./ReceiverProfile";
 import { Message } from "@/types/MessageTypes";
 import { ChatProps } from "@/types/ChatTypes";
+import { formatDate } from "@/lib/utils";
 
 const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
   const { data } = useGetChatByIdQuery(chatId ?? "", {
@@ -22,7 +23,7 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
   });
 
   const receiverUser =
-    chatMessages?.messages[0]?.receiver?.id === dbUserId
+    chatMessages?.messages[0]?.sender?.id !== dbUserId
       ? chatMessages?.messages[0]?.sender?.id
       : chatMessages?.messages[0]?.receiver?.id;
 
@@ -34,14 +35,6 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
   const [inputMessage, setInputMessage] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const wsRef = useRef<ReconnectingWebSocket | null>(null);
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) {
-      return "Invalid Date";
-    }
-    return date.toISOString();
-  };
 
   useEffect(() => {
     if (chatMessages?.messages) {
@@ -76,11 +69,10 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
         console.log("Received plain text message:", event.data);
         if (typeof event.data === "string") {
           const newMessage: Message = {
-            id: Date.now().toString(),
             sender: { id: "", username: "", profile_pic: "" },
             receiver: { id: "", username: "", profile_pic: "" },
             content: event.data,
-            created_at: new Date().toLocaleString(),
+            created_at: formatDate(new Date().toLocaleString()),
             chat_id: chatId,
           };
           if (newMessage.chat_id === chatId) {
@@ -115,11 +107,12 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
         sender_id: dbUserId,
         receiver_id: receiverUser,
         content: inputMessage,
+        chat_id: chatId,
       };
 
       const response = await sendMessage(messageData).unwrap();
 
-      handleNewMessage(response);
+      handleNewMessage(response?.message);
 
       setInputMessage("");
     } catch (error) {
@@ -135,11 +128,9 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
     );
   }
 
-  const receiverData = otherUser?.user;
-
   return (
     <div className="flex flex-col h-full">
-      <ReceiverProfile receiverData={receiverData} />
+      <ReceiverProfile receiverData={otherUser?.user} />
       <MessageComponent messages={messages} dbUserId={dbUserId} />
 
       <ChatInput

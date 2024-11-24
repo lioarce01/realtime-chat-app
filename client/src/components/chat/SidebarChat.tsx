@@ -1,7 +1,5 @@
 import React from "react";
 import { useGetUserByIdQuery, useGetUserChatsQuery } from "@/redux/api/userApi";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { AvatarImage } from "@radix-ui/react-avatar";
 import { SidebarProps } from "@/types/UserTypes";
 import SidebarChats from "./SidebarChats";
 

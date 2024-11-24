@@ -2,6 +2,7 @@ import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import { persistReducer, persistStore } from "redux-persist";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
 import userReducer from "@/redux/slices/userSlice";
+import chatReducer from "@/redux/slices/chatSlice";
 import { userApi } from "./api/userApi";
 import { chatApi } from "./api/chatApi";
 
@@ -27,13 +28,14 @@ const storage =
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["user"],
+  whitelist: ["user", "chat"],
 };
 
 const rootReducer = combineReducers({
   [chatApi.reducerPath]: chatApi.reducer,
   [userApi.reducerPath]: userApi.reducer,
   user: userReducer,
+  chat: chatReducer,
 });
 
 const localStorage = persistReducer(persistConfig, rootReducer);
