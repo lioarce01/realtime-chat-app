@@ -18,9 +18,12 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
     skip: !chatId,
   });
 
-  const { data: chatMessages } = useGetMessagesByChatIdQuery(chatId ?? "", {
-    skip: !chatId,
-  });
+  const { data: chatMessages, isLoading } = useGetMessagesByChatIdQuery(
+    chatId ?? "",
+    {
+      skip: !chatId,
+    }
+  );
 
   const receiverUser =
     chatMessages?.messages[0]?.sender?.id !== dbUserId
@@ -130,7 +133,7 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
 
   return (
     <div className="flex flex-col h-full">
-      <ReceiverProfile receiverData={otherUser?.user} />
+      <ReceiverProfile receiverData={otherUser?.user} isLoading={isLoading} />
       <MessageComponent messages={messages} dbUserId={dbUserId} />
 
       <ChatInput

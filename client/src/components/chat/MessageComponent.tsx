@@ -10,10 +10,9 @@ const MessageComponent: React.FC<MessagesProps> = ({ messages, dbUserId }) => {
   }, [messages]);
 
   return (
-    <div className="flex-1 overflow-y-auto p-4">
+    <div className="flex-1 overflow-y-auto p-4 bg-neutral-900">
       {messages && messages.length > 0 ? (
         messages.map((message: Message, index: number) => {
-          // Determina si es un mensaje enviado por el usuario actual
           const isOwnMessage = message.sender?.id === dbUserId;
 
           return (
@@ -24,14 +23,14 @@ const MessageComponent: React.FC<MessagesProps> = ({ messages, dbUserId }) => {
               }`}
             >
               <div
-                className={`max-w-sm p-3 rounded-lg shadow ${
+                className={`max-w-sm p-3 rounded-2xl shadow-lg ${
                   isOwnMessage
-                    ? "bg-blue-600 text-white"
-                    : "bg-neutral-800 text-white"
+                    ? "bg-neutral-800 text-cyan-400 border border-cyan-400"
+                    : "bg-neutral-800 text-pink-400 border border-pink-400"
                 }`}
               >
-                <p className="text-sm">{message.content}</p>
-                <p className="text-xs text-neutral-400 text-right mt-1">
+                <p className="text-sm leading-relaxed">{message.content}</p>
+                <p className="text-xs text-neutral-400 text-right mt-2">
                   {formatDate(message?.created_at)}
                 </p>
               </div>
@@ -39,7 +38,9 @@ const MessageComponent: React.FC<MessagesProps> = ({ messages, dbUserId }) => {
           );
         })
       ) : (
-        <p className="text-center text-neutral-500">Loading messages...</p>
+        <p className="text-center text-gray-500 w-full h-full flex justify-center items-center">
+          Loading messages...
+        </p>
       )}
       <div ref={messagesEndRef} />
     </div>

@@ -1,5 +1,6 @@
 export interface ReceiverProfileProps {
   receiverData: any;
+  isLoading: any;
 }
 
 export interface SidebarProps {
