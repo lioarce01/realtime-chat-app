@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type UserController struct {
@@ -29,7 +30,14 @@ func (controller *UserController) GetUserBySubOrID(c *gin.Context) {
 
 
 func (controller *UserController) GetAllUsers(c *gin.Context) {
-    users, err := controller.UserService.GetAllUsers()
+    username := c.Query("username")
+
+    filter := bson.M{}
+    if username != "" {
+        filter["username"] = bson.M{"$regex": username, "$options": "i"} 
+    }
+
+    users, err := controller.UserService.GetAllUsers(filter)
     if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
         return

@@ -12,7 +12,6 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var _ ports.UserPort = &UserRepository{
@@ -37,11 +36,11 @@ func (r *UserRepository) Register(user *domain.User) error {
     return err
 }
 
-func (r *UserRepository) GetAllUsers() ([]domain.User, error) {
+func (r *UserRepository) GetAllUsers(filter bson.M) ([]domain.User, error) {
     collection := config.DB.Collection("users")
     var users []domain.User
 
-    cursor, err := collection.Find(context.TODO(), bson.M{}, options.Find())
+    cursor, err := collection.Find(context.TODO(), filter)
     if err != nil {
         log.Println("Error fetching users:", err)
         return nil, err
