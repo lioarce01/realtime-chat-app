@@ -90,3 +90,21 @@ func (controller *ChatController) GetChatByID(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"chat": chat})
 }
+
+func (controller *ChatController) DeleteChatByID(c *gin.Context) {
+	chatIDParam := c.Param("id")
+
+	chatID, err := primitive.ObjectIDFromHex(chatIDParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid chat ID"})
+		return
+	}
+
+	err = controller.ChatService.DeleteChatByID(chatID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not delete chat"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Chat deleted successfully"})
+}

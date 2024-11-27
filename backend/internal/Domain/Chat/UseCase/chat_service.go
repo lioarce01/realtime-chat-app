@@ -3,6 +3,7 @@ package services
 import (
 	domain "backend/internal/Domain/Chat/Domain"
 	ports "backend/internal/Domain/Chat/Ports"
+	"errors"
 	"fmt"
 	"log"
 
@@ -46,4 +47,16 @@ func (s *ChatService) FindOrCreateChat(user1ID, user2ID primitive.ObjectID) (*do
 	}
 
 	return nil, fmt.Errorf("unexpected error: %v", err)
+}
+
+func (s *ChatService) DeleteChatByID(chatID primitive.ObjectID) error {
+	chat, err := s.ChatRepo.GetChatByID(chatID)
+	if err != nil {
+		return err
+	}
+	if chat == nil {
+		return errors.New("chat not found")
+	}
+
+	return s.ChatRepo.DeleteChatByID(chatID)
 }

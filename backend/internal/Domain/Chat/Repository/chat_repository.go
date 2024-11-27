@@ -197,6 +197,26 @@ func (r *ChatRepository) FindOrCreateChat(user1ID, user2ID primitive.ObjectID) (
 	return &chat, nil
 }
 
+func (r *ChatRepository) DeleteChatByID(chatID primitive.ObjectID) error {
+	chatCollection := config.DB.Collection("chats")
+	messageCollection := config.DB.Collection("messages")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	_, err := chatCollection.DeleteOne(ctx, bson.M{"_id": chatID})
+	if err != nil {
+		return err
+	}
+
+	_, err = messageCollection.DeleteMany(ctx, bson.M{"_id": chatID})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func pointerToInt64(i int64) *int64 {
 	return &i
 }
