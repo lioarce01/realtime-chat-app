@@ -8,7 +8,10 @@ export const userApi = createApi({
   tagTypes: ["User"],
   endpoints: (builder) => ({
     getAllUsers: builder.query({
-      query: () => "/users",
+      query: (query) => {
+        const queryString = query ? `?username=${query}` : "";
+        return `/users${queryString}`;
+      },
     }),
     registerUser: builder.mutation({
       query: (user) => {

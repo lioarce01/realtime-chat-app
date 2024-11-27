@@ -3,12 +3,14 @@ import { useGetUserByIdQuery, useGetUserChatsQuery } from "@/redux/api/userApi";
 import { SidebarProps } from "@/types/UserTypes";
 import SidebarChats from "./SidebarChats";
 import UserMenu from "./UserMenu";
+import Searchbar from "./Searchbar";
 
 const Sidebar: React.FC<SidebarProps> = ({
   userId,
   setSelectedChatId,
   selectedChatId,
   dbUser,
+  onCreateChat,
 }) => {
   const { data, error } = useGetUserByIdQuery(userId, {
     skip: !userId,
@@ -30,11 +32,13 @@ const Sidebar: React.FC<SidebarProps> = ({
         <h1 className="text-2xl font-bold">Chats</h1>
         <UserMenu dbUser={dbUser} />
       </div>
+      <Searchbar onCreateChat={onCreateChat} />
       <SidebarChats
         chats={chats}
         setSelectedChatId={setSelectedChatId}
         selectedChatId={selectedChatId}
         userId={userId}
+        onCreateChat={onCreateChat}
       />
     </div>
   );

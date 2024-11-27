@@ -26,9 +26,9 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
   );
 
   const receiverUser =
-    chatMessages?.messages[0]?.sender?.id !== dbUserId
-      ? chatMessages?.messages[0]?.sender?.id
-      : chatMessages?.messages[0]?.receiver?.id;
+    data?.chat?.user1_id !== dbUserId
+      ? data?.chat?.user1_id
+      : data?.chat?.user2_id;
 
   const { data: otherUser } = useGetUserByIdQuery(receiverUser ?? "", {
     skip: !receiverUser,
@@ -43,11 +43,23 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
     if (chatMessages?.messages) {
       setMessages(chatMessages.messages);
     }
-  }, [data]);
+  }, [chatMessages]);
 
-  const handleNewMessage = useCallback((newMessage: Message) => {
-    setMessages((prevMessages) => [...prevMessages, newMessage]);
-  }, []);
+  const handleNewMessage = useCallback(
+    (newMessage: Message) => {
+      setMessages((prevMessages) => {
+        const updatedMessage = {
+          ...newMessage,
+          sender:
+            newMessage.sender?.id === dbUserId
+              ? { id: dbUserId, username: dbUserId, profile_pic: "" }
+              : newMessage.sender,
+        };
+        return [...prevMessages, updatedMessage];
+      });
+    },
+    [dbUserId]
+  );
 
   useEffect(() => {
     if (!chatId || !dbUserId) return;
@@ -65,17 +77,21 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
         const newMessage = JSON.parse(event.data);
         console.log("received message:", newMessage);
         if (newMessage.chat_id === chatId) {
-          newMessage.created_at = formatDate(newMessage.created_at);
+          newMessage.created_at = newMessage.created_at;
+          newMessage.sender =
+            newMessage.sender_id === dbUserId
+              ? { id: dbUserId, username: dbUserId, profile_pic: "" }
+              : newMessage.sender;
           handleNewMessage(newMessage);
         }
       } catch (error) {
         console.log("Received plain text message:", event.data);
         if (typeof event.data === "string") {
           const newMessage: Message = {
-            sender: { id: "", username: "", profile_pic: "" },
-            receiver: { id: "", username: "", profile_pic: "" },
+            sender: { id: dbUserId, username: dbUserId, profile_pic: "" },
+            receiver: { id: receiverUser ?? "", username: "", profile_pic: "" },
             content: event.data,
-            created_at: formatDate(new Date().toLocaleString()),
+            created_at: new Date().toISOString(),
             chat_id: chatId,
           };
           if (newMessage.chat_id === chatId) {
@@ -100,7 +116,7 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
         wsRef.current.close();
       }
     };
-  }, [chatId, dbUserId, handleNewMessage]);
+  }, [chatId, dbUserId, handleNewMessage, receiverUser]);
 
   const handleSendMessage = async () => {
     if (inputMessage.trim() === "" || !dbUserId || !chatId) return;
@@ -113,10 +129,10 @@ const Chat: React.FC<ChatProps> = ({ chatId, dbUserId }) => {
         chat_id: chatId,
       };
 
-      const response = await sendMessage(messageData).unwrap();
+      // Enviar mensaje al backend
+      await sendMessage(messageData).unwrap();
 
-      handleNewMessage(response?.message);
-
+      // Limpiar el input después del envío
       setInputMessage("");
     } catch (error) {
       console.error("Failed to send message:", error);

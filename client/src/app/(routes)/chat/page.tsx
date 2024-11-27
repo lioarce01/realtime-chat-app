@@ -7,6 +7,7 @@ import AuthSyncWrapper from "@/components/auth/AuthSyncWrapper";
 import { useAuth0 } from "@auth0/auth0-react";
 import Chat from "@/components/chat/Chat";
 import Sidebar from "@/components/chat/Sidebar";
+import { useCreateChatMutation } from "@/redux/api/chatApi";
 
 const ChatPage = () => {
   const { user } = useAuth0();
@@ -15,7 +16,23 @@ const ChatPage = () => {
     skip: !user?.sub,
   });
 
+  const [createChat] = useCreateChatMutation();
+
   const dbUserId = dbUser?.user?.id;
+
+  const handleCreateChat = async (otherUserId: string) => {
+    if (dbUserId) {
+      try {
+        const result = await createChat({
+          user1_id: dbUserId,
+          user2_id: otherUserId,
+        }).unwrap();
+        setSelectedChatId(result.id);
+      } catch (error) {
+        console.error("Failed to create chat:", error);
+      }
+    }
+  };
 
   return (
     <AuthSyncWrapper>
@@ -33,6 +50,7 @@ const ChatPage = () => {
               setSelectedChatId={setSelectedChatId}
               selectedChatId={selectedChatId}
               dbUser={dbUser}
+              onCreateChat={handleCreateChat}
             />
             <div className="flex-1 flex flex-col bg-neutral-950">
               <Chat chatId={selectedChatId} dbUserId={dbUserId} />

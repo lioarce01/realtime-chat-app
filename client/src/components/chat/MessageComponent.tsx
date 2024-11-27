@@ -11,7 +11,7 @@ const MessageComponent: React.FC<MessagesProps> = ({ messages, dbUserId }) => {
 
   return (
     <div className="flex-1 overflow-y-auto p-4 bg-neutral-900">
-      {messages && messages.length > 0 ? (
+      {messages ? (
         messages.map((message: Message, index: number) => {
           const isOwnMessage = message.sender?.id === dbUserId;
 

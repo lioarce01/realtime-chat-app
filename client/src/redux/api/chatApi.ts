@@ -21,6 +21,13 @@ export const chatApi = createApi({
         { type: "Chat", id: chat_id },
       ],
     }),
+    createChat: builder.mutation({
+      query: (newChat) => ({
+        url: "/create-chat",
+        method: "POST",
+        body: newChat,
+      }),
+    }),
     getMessagesByChatId: builder.query({
       query: (id) => `/chats/${id}/messages`,
       providesTags: (result, error, id) => [{ type: "Chat", id }],
@@ -33,4 +40,5 @@ export const {
   useSendMessageMutation,
   useGetMessagesByChatIdQuery,
   useLazyGetMessagesByChatIdQuery,
+  useCreateChatMutation,
 } = chatApi;
