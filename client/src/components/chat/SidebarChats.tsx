@@ -43,7 +43,7 @@ const SidebarChats: React.FC<SidebarProps> = ({
         ))
       ) : (
         <div className="p-4 text-neutral-300 w-full flex items-center justify-center">
-          Loading chats...
+          Search a user and start a chat.
         </div>
       )}
     </div>

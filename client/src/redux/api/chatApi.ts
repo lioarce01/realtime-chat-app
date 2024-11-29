@@ -27,6 +27,9 @@ export const chatApi = createApi({
         method: "POST",
         body: newChat,
       }),
+      invalidatesTags: (result, error, { chat_id }) => [
+        { type: "Chat", id: chat_id },
+      ],
     }),
     getMessagesByChatId: builder.query({
       query: (id) => `/chats/${id}/messages`,

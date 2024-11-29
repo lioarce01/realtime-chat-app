@@ -6,7 +6,7 @@ import { UserCard } from "@/components/chat/UserCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SearchbarProps } from "@/types/UserTypes";
 
-const Searchbar: React.FC<SearchbarProps> = ({ onCreateChat }) => {
+const Searchbar: React.FC<SearchbarProps> = ({ onCreateChat, refetchUser }) => {
   const [search, setSearch] = useState("");
   const [triggerSearch, setTriggerSearch] = useState(false);
   const { data, isLoading, error } = useGetAllUsersQuery(search, {

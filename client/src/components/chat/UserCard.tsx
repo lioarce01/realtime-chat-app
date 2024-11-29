@@ -35,7 +35,7 @@ export const UserCard: React.FC<UserCardProps> = ({ user, onSendMessage }) => {
           className="w-full bg-neutral-800 hover:bg-neutral-700"
           onClick={() => onSendMessage(user.id)}
         >
-          Send Message
+          Create Chat
         </Button>
       </CardFooter>
     </Card>

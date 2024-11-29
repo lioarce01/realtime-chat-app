@@ -24,6 +24,7 @@ export const userApi = createApi({
     }),
     getUserById: builder.query({
       query: (id) => `/users/${id}`,
+      providesTags: (result, error, id) => [{ type: "User", id }],
     }),
     getUserChats: builder.query({
       query: (id) => `/users/${id}/chats`,

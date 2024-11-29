@@ -12,7 +12,7 @@ import { useCreateChatMutation } from "@/redux/api/chatApi";
 const ChatPage = () => {
   const { user } = useAuth0();
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
-  const { data: dbUser } = useGetUserByIdQuery(user?.sub ?? "", {
+  const { data: dbUser, refetch } = useGetUserByIdQuery(user?.sub ?? "", {
     skip: !user?.sub,
   });
 
@@ -28,6 +28,7 @@ const ChatPage = () => {
           user2_id: otherUserId,
         }).unwrap();
         setSelectedChatId(result.id);
+        refetch();
       } catch (error) {
         console.error("Failed to create chat:", error);
       }
